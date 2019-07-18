@@ -1,10 +1,7 @@
 # IntelliKeys_uhls
-IntelliKeys USB library for the USB Host Library for SAMD.
+IntelliKeys USB host driver for the USB Host Library for SAMD.
 
 The only example that should work is ikevent.ino.
-
-test.sh is a bash script that should create a clean room build evironment
-in /tmp on a Linux system. Your milage may vary.
 
 The firmware directory has a UF2 file for drag and drop upload. No need to
 setup the IDE, board packages, libraries, etc. The output is on UART TX at
@@ -19,6 +16,15 @@ the IDE for real development.
 
 
 ![Trinket M0 with IntelliKeys board](./images/tm0_ikeys.jpg)
+
+The red cable is a USB OTG to host cable. The tiny board is a Trinket M0. The
+cable connected to the Trinket M0 is a USB TTL serial cable similar to this
+https://www.adafruit.com/product/954.
+
+Even though the cable is described for use with Raspberry Pi it works with any
+TTL UART with 3.3V logic levels. Work fine with ARM and ESP boards. The cable
+plugs into a computer running a terminal program displaying whatever comes
+out of the Trinket M0 UART TX.
 
 The following is from the Teensy 3.6 (t36) version and needs updating and/or
 removal. Some of the t36 examples may be useful but they have been removed
@@ -109,7 +115,7 @@ this does not work on Android.
 
 ### KeyMacro
 
-Trigger keyboard and mouse outputs using the switch inputs and touch area.  The
+Trigger keyboard and mouse outputs using the switch inputs and touch area. The
 key and mouse outputs are read from a file on a micro SD card named
 keymacro.txt. The touch area is divided into a 2x3 grid for a total of 6 large
 touch buttons.
