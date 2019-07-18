@@ -1,0 +1,27 @@
+# Objects
+IntelliKeys	KEYWORD1
+
+# Common Functions
+setLED	KEYWORD2
+sound	KEYWORD2
+get_version	KEYWORD2
+onMembranePress	KEYWORD2
+onMembraneRelease	KEYWORD2
+onSwitch	KEYWORD2
+onSensor	KEYWORD2
+onVersion	KEYWORD2
+onConnect	KEYWORD2
+onDisconnect	KEYWORD2
+onOnOffSwitch	KEYWORD2
+onSerialNum	KEYWORD2
+onCorrectMembrane	KEYWORD2
+onCorrectSwitch	KEYWORD2
+onCorrectDone	KEYWORD2
+
+# Literals
+IK_LED_SHIFT	LITERAL1
+IK_LED_CAPS_LOCK	LITERAL1
+IK_LED_MOUSE	LITERAL1
+IK_LED_ALT	LITERAL1
+IK_LED_CTRL_CMD	LITERAL1
+IK_LED_NUM_LOCK	LITERAL1
