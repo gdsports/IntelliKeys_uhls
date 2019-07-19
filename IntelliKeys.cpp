@@ -290,6 +290,10 @@ int IntelliKeys::ezusb_DownloadIntelHex(bool internal)
                     (internal)?ANCHOR_LOAD_INTERNAL:ANCHOR_LOAD_EXTERNAL,
                     (uint8_t)pHex->Address, (uint8_t)(pHex->Address>>8),
                     0, pHex->Length, pHex->Length, pHexBuf, NULL);
+            if(rv && rv != USB_ERRORFLOW) {
+                Release();
+                return 1;
+            }
             pHex++;
             return 0;
         }
@@ -305,6 +309,10 @@ void IntelliKeys::IK_firmware_load()
     IK_state = 1;
     USBTRACE("set interface(0,0)\r\n");
     rv = pUsb->ctrlReq(bAddress, 0, 1, 11, 0, 0, 0, 0, 0, NULL, NULL);
+    if(rv && rv != USB_ERRORFLOW) {
+        Release();
+        return;
+    }
 
     ezusb_8051Reset(1);
     pHex = (PINTEL_HEX_RECORD)loader;
@@ -443,18 +451,6 @@ void IntelliKeys::Task()
     if(!bPollEnable) return;
 
     IK_poll();
-#if 0
-    for (int i = 0; i < 3; i++) {
-        uint32_t len = rxlen[i];
-        if (len) {
-            if (i == 0) handleEvents(rxpacket[i], len);
-            NVIC_DISABLE_IRQ(IRQ_USBHS);
-            queue_Data_Transfer(rxpipe[i], rxpacket[i], 64, this);
-            rxlen[i] = 0;
-            NVIC_ENABLE_IRQ(IRQ_USBHS);
-        }
-    }
-#endif
 
     if (!eeprom_all_valid) get_eeprom();
 }
@@ -474,12 +470,30 @@ inline int IntelliKeys::PostCommand(uint8_t *command)
     return rv;
 }
 
+/*
+ * parameter number must be set to one of these.
+ * enum IK_LEDS {
+ *  IK_LED_SHIFT=1,
+ *  IK_LED_CAPS_LOCK=4,
+ *  IK_LED_MOUSE=7,
+ *  IK_LED_ALT=2,
+ *  IK_LED_CTRL_CMD=5,
+ *  IK_LED_NUM_LOCK=8
+ * }
+ *
+ * parameter value is 1 for ON, 0 for OFF
+ */
 int IntelliKeys::setLED(uint8_t number, uint8_t value)
 {
     uint8_t command[IK_REPORT_LEN] = {IK_CMD_LED,number,value,0,0,0,0,0};
     return PostCommand(command);
 }
 
+/*
+ * parameter freq = note frequency 0..255 ?
+ * parameter duration = note duration in 10 ms increments
+ * parameter volume = 0..255
+ */
 int IntelliKeys::sound(int freq, int duration, int volume)
 {
     uint8_t report[IK_REPORT_LEN] = {IK_CMD_TONE,0,0,0,0,0,0,0};
@@ -565,53 +579,6 @@ void IntelliKeys::start()
 
     if (connect_callback) (*connect_callback)();
 }
-
-#if 0
-uint32_t IntelliKeys::RcvData(uint16_t *bytes_rcvd, uint8_t *dataptr) {
-    uint32_t rv = pUsb->inTransfer((uint32_t)bAddress, epInfo[epDataInIndex].epAddr, bytes_rcvd, dataptr);
-    if(rv && rv != USB_ERRORFLOW) {
-        Release();
-    }
-    return rv;
-}
-
-uint32_t IntelliKeys::SndData(uint16_t nbytes, uint8_t *dataptr) {
-    size_t outlen;
-    uint32_t rv;
-    for (size_t i = 0; i < nbytes; i += outlen) {
-        outlen = min(64, nbytes - i);
-        rv = pUsb->outTransfer(bAddress, epInfo[epDataOutIndex].epAddr, outlen, dataptr);
-        if (rv) {
-            Serial.print("IntelliKeys::SndData|outTransfer ");
-            Serial.println(rv);
-        }
-        if(rv && rv != USB_ERRORFLOW) {
-            Release();
-        }
-        dataptr += outlen;
-    }
-    return rv;
-}
-
-uint8_t IntelliKeys::GetStatus() {
-    uint8_t printer_status=0x10;
-    if (!bidirectional) {
-        uint32_t rv = pUsb->ctrlReq(bAddress, 0, USBPRINTER_GET, USBPRINTER_REQUEST_STATUS, 0x00, 0x00, bIface, 1, 1, &printer_status, NULL);
-        if(rv && rv != USB_ERRORFLOW) {
-            Release();
-        }
-    }
-    return printer_status;
-}
-
-uint32_t IntelliKeys::SoftReset() {
-    uint32_t rv = pUsb->ctrlReq(bAddress, 0, USBPRINTER_PUT, USBPRINTER_REQUEST_SOFT_RESET, 0x00, 0x00, bIface, 0, 0, NULL, NULL);
-    if(rv && rv != USB_ERRORFLOW) {
-        Release();
-    }
-    return rv;
-}
-#endif
 
 void IntelliKeys::PrintEndpointDescriptor(const USB_ENDPOINT_DESCRIPTOR* ep_ptr) {
     Notify(PSTR("Endpoint descriptor:"), 0x80);

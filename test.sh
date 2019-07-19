@@ -17,6 +17,8 @@ arduino --install-boards "arduino:samd"
 arduino --pref "boardsmanager.additional.urls=https://adafruit.github.io/arduino-board-index/package_adafruit_index.json" --save-prefs
 arduino --install-boards "adafruit:samd"
 cd $LIBDIR
+# Install the latest Arduino JSON library
+arduino --install-library "ArduinoJson"
 # Install USB Host Library SAMD
 git clone https://github.com/gdsports/USB_Host_Library_SAMD
 # For production

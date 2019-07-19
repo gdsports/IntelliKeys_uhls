@@ -1,6 +1,6 @@
 # IntelliKeys JSON events and commands
 
-The ikevent.ino sketch is the bridge between the IK USB host driver API 
+The ikevent.ino sketch is the bridge between the IK USB host driver API
 defined in IntelliKeys.h and the UART. It currently uses JSON for events
 and commands but could be modified to implement a different protocol over
 the UART.
@@ -46,18 +46,22 @@ Number. See the next section for commands. All appear one per line.
 
 ## JSON Commands
 
-Send commands one per line. Not implemented yet.
+Send commands one per line. The line must be terminated with '\n'.
 
 ### Get Version
-    {"cmd":"getversion"}
+    {"cmd":"getver"}
     Send this JSON command to trigger the fwver event.
 
 ### Get Sensors
-    {"cmd":"getsensors"}
+    {"cmd":"getsnsrs"}
     Send this JSON command to trigger the sensor events.
 
+### Get Serial Number
+    {"cmd":"getsn"}
+    Send this JSON command to trigger the serial number event.
+
 ### Get Correct???
-    {"cmd":"getcorrect"}
+    {"cmd":"getcorr"}
     I am not sure how this works. If it is needed perhaps some input from
     the IK experts would help.
 
@@ -80,5 +84,4 @@ Send commands one per line. Not implemented yet.
     n = 0..255, m=0..255, l=0..255
 
     I think n is really 0..95 to select a note from 8 octaves with 12 notes
-    per octave. But I have not experimented with this feature. The driver
-    sends the packet to IK so it SHOULD work.
+    per octave. But I have not experimented with this feature.
