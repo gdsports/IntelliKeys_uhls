@@ -518,6 +518,16 @@ int IntelliKeys::get_all_sensors(void) {
     return PostCommand(command);
 }
 
+int IntelliKeys::get_onoff(void) {
+    uint8_t command[IK_REPORT_LEN] = {IK_CMD_ONOFFSWITCH,0,0,0,0,0,0,0};
+    return PostCommand(command);
+}
+
+int IntelliKeys::reset(void) {
+    uint8_t command[IK_REPORT_LEN] = {IK_CMD_RESET_DEVICE,0,0,0,0,0,0,0};
+    return PostCommand(command);
+}
+
 int IntelliKeys::get_correct(void) {
     USBTRACE("get_correct\r\n");
     uint8_t command[IK_REPORT_LEN] = {IK_CMD_CORRECT,0,0,0,0,0,0,0};

@@ -51,6 +51,8 @@ class IntelliKeys: public USBDeviceConfig, public UsbConfigXtracter {
         int sound(int freq, int duration, int volume);
         int get_version(void);
         int get_all_sensors(void);
+        int get_onoff(void);
+        int reset(void);
         int get_correct(void);
 
         // Event callback functions

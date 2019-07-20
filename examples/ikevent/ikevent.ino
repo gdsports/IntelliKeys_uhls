@@ -109,26 +109,32 @@ void IK_get_SN(uint8_t SN[IK_EEPROM_SN_SIZE])
   JSON.println("\"}");
 }
 
-void setup() {
-  DBSerial.begin(115200);
-  DBSerial.println("IntelliKeys USB Test");
-  // If there are concerns about JSON transmission being too slow, boost
-  // the UART speed. 4*115200 or 8*115200 works on the SAMD21. Make sure to
-  // match the UART speed on the other side.
-  JSON.begin(115200);
-  myusb.Init();
+void IK_correct_membrane(int x, int y)
+{
+  char buf[80];
+  int buflen;
+  buflen = snprintf(buf, sizeof(buf),
+      "{\"evt\":\"corrmemb\",\"x\":%d,\"y\":%d}", x, y);
+  if (buflen > 0) {
+    JSON.println(buf);
+  }
+}
 
-  ikey1.onConnect(IK_connect);
-  ikey1.onDisconnect(IK_disconnect);
-  ikey1.onMembranePress(IK_press);
-  ikey1.onMembraneRelease(IK_release);
-  ikey1.onSwitch(IK_switch);
-  ikey1.onSensor(IK_sensor);
-  ikey1.onVersion(IK_version);
-  ikey1.onOnOffSwitch(IK_onoff);
-  ikey1.onSerialNum(IK_get_SN);
+void IK_correct_switch(int switch_num, int switch_state)
+{
+  char buf[80];
+  int buflen;
+  buflen = snprintf(buf, sizeof(buf),
+      "{\"evt\":\"corrsw\",\"num\":%d,\"st\":%d}",
+      switch_num, switch_state);
+  if (buflen > 0) {
+    JSON.println(buf);
+  }
+}
 
-  memset(mySN, 0, sizeof(mySN));
+void IK_correct_done()
+{
+  JSON.println("{\"evt\":\"corrdone\"}");
 }
 
 void readCommand()
@@ -138,7 +144,7 @@ void readCommand()
   int bytesAvail;
   if ((bytesAvail = JSON.available()) > 0) {
     size_t bytesIn;
-    JSON.setTimeout(0);
+    JSON.setTimeout(10);
     if ((bytesIn = JSON.readBytesUntil('\n', command, sizeof(command)-1)) > 0) {
       command[bytesIn] = '\0';
       // Parse JSON
@@ -171,17 +177,49 @@ void readCommand()
         JSON.print(mySN);
         JSON.println("\"}");
       }
+      else if (strcmp(cmd, "reset") == 0) {
+        ikey1.reset();
+      }
       else if (strcmp(cmd, "getver") == 0) {
         ikey1.get_version();
       }
       else if (strcmp(cmd, "getsnsrs") == 0) {
         ikey1.get_all_sensors();
       }
+      else if (strcmp(cmd, "getonoff") == 0) {
+        ikey1.get_onoff();
+      }
       else if (strcmp(cmd, "getcorr") == 0) {
         ikey1.get_correct();
       }
     }
   }
+}
+
+void setup() {
+  DBSerial.begin(115200);
+  DBSerial.println("IntelliKeys USB Test");
+  // If there are concerns about JSON transmission being too slow, boost
+  // the UART speed. 4*115200 or 8*115200 works on the SAMD21. Make sure to
+  // match the UART speed on the other side.
+  JSON.begin(115200);
+  myusb.Init();
+
+  ikey1.onConnect(IK_connect);
+  ikey1.onDisconnect(IK_disconnect);
+  ikey1.onMembranePress(IK_press);
+  ikey1.onMembraneRelease(IK_release);
+  ikey1.onSwitch(IK_switch);
+  ikey1.onSensor(IK_sensor);
+  ikey1.onVersion(IK_version);
+  ikey1.onOnOffSwitch(IK_onoff);
+  ikey1.onSerialNum(IK_get_SN);
+  ikey1.onSerialNum(IK_get_SN);
+  ikey1.onCorrectMembrane(IK_correct_membrane);
+  ikey1.onCorrectSwitch(IK_correct_switch);
+  ikey1.onCorrectDone(IK_correct_done);
+
+  memset(mySN, 0, sizeof(mySN));
 }
 
 void loop() {

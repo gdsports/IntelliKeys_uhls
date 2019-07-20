@@ -44,6 +44,18 @@ Number. See the next section for commands. All appear one per line.
     {"evt":"sernum","sn":"SN"}
     where SN=string
 
+### Correct Membrane
+    {"evt":"corrmemb","x":n,"y":m}
+    where n=0..23, m=0..23
+
+### Correct Switch
+    {"evt":"corrsw","num":n,"st":m}
+    where n = 0,1 and m=0,1
+
+### Correct Done
+    {"evt":"corrdone"}
+    Final correction event.
+
 ## JSON Commands
 
 Send commands one per line. The line must be terminated with '\n'.
@@ -56,14 +68,23 @@ Send commands one per line. The line must be terminated with '\n'.
     {"cmd":"getsnsrs"}
     Send this JSON command to trigger the sensor events.
 
+### Get On/Off Switch
+    {"cmd":"getonoff"}
+    Send this JSON command to trigger the onoff event and the sensor events.
+
 ### Get Serial Number
     {"cmd":"getsn"}
     Send this JSON command to trigger the serial number event.
 
-### Get Correct???
+### Get Correct
     {"cmd":"getcorr"}
-    I am not sure how this works. If it is needed perhaps some input from
-    the IK experts would help.
+    Send this JSON command to trigger correct done, correct membrane,
+    and correct switch events. This allows the sender to capture the
+    current state of the membrane and AT switches.
+
+### Reset
+    {"cmd":"reset"}
+    Reset/reboot IntelliKeys board.
 
 ### Set LED
     {"cmd":"setled", "num":n, "val":m}
