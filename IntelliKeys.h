@@ -56,6 +56,9 @@ class IntelliKeys: public USBDeviceConfig, public UsbConfigXtracter {
         int get_correct(void);
 
         // Event callback functions
+        void onRawEvent(void (*function)(const uint8_t *rxEvent, size_t len)) {
+            raw_event_callback = function;
+        }
         void onMembranePress(void (*function)(int x, int y)) {
             membrane_press_callback = function;
         }
@@ -124,6 +127,7 @@ class IntelliKeys: public USBDeviceConfig, public UsbConfigXtracter {
         int  ezusb_DownloadIntelHex(bool internal);
         void ezusb_8051Reset(uint8_t resetBit);
         void IK_firmware_load();
+        void (*raw_event_callback)(const uint8_t *rxEvent, size_t len);
         void (*membrane_press_callback)(int x, int y);
         void (*membrane_release_callback)(int x, int y);
         void (*switch_callback)(int switch_number, int switch_state);
@@ -146,7 +150,7 @@ class IntelliKeys: public USBDeviceConfig, public UsbConfigXtracter {
             uint8_t serialnumber[IK_EEPROM_SN_SIZE];
             uint8_t sensorBlack[IK_NUM_SENSORS];
             uint8_t sensorWhite[IK_NUM_SENSORS];
-        } eeprom_t;
+        } __attribute__((packed)) eeprom_t;
         void get_eeprom(void);
         void clear_eeprom();
         eeprom_t eeprom_data;

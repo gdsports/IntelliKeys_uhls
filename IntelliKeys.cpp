@@ -349,7 +349,7 @@ void IntelliKeys::sensorUpdate(int sensor, int value)
 void IntelliKeys::handleEvents(const uint8_t *rxpacket, size_t len)
 {
     if ((rxpacket == NULL) || (len == 0)) return;
-
+    if (raw_event_callback) (*raw_event_callback)(rxpacket, len);
     switch (*rxpacket) {
         case IK_EVENT_ACK:
             //USBTRACE("IK_EVENT_ACK\r\n");
@@ -403,10 +403,15 @@ void IntelliKeys::handleEvents(const uint8_t *rxpacket, size_t len)
             break;
         case IK_EVENT_EEPROM_READBYTE:
             {
-                uint8_t idx = rxpacket[2] - 0x80;
-                uint8_t *p = (uint8_t *)&eeprom_data;
-                p[idx] = rxpacket[1];
-                eeprom_valid[idx] = true;
+                if (rxpacket[2] >= 0x80) {
+                    uint8_t idx = rxpacket[2] - 0x80;
+                    uint8_t *p = (uint8_t *)&eeprom_data;
+                    p[idx] = rxpacket[1];
+                    eeprom_valid[idx] = true;
+                }
+                else {
+                    USBTRACE("IK_EVENT_EEPROM_READBYTE idx bad");
+                }
             }
             break;
         case IK_EVENT_DEVICEREADY:
@@ -539,9 +544,7 @@ void IntelliKeys::get_eeprom(void)
     uint8_t report[IK_REPORT_LEN] = {IK_CMD_EEPROM_READBYTE,0,0x1F,0,0,0,0,0};
     uint8_t pending = 0;
 
-    //  if (eeprom_period > 64) {
     USBTRACE("get_eeprom\r\n");
-    //      eeprom_period = 0;
     for (uint8_t i=0; i < sizeof(eeprom_t); i++) {
         if (!eeprom_valid[i]) {
             report[1] = 0x80 + i;
@@ -557,7 +560,6 @@ void IntelliKeys::get_eeprom(void)
 
         if (on_SN_callback) (*on_SN_callback)(eeprom_data.serialnumber);
     }
-    //  }
 }
 
 void IntelliKeys::clear_eeprom()

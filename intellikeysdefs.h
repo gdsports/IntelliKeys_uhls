@@ -42,6 +42,8 @@
 #define IK_CMD_STOP_OUTPUT          CMD_BASE+17
 #define IK_CMD_ALL_SENSORS          CMD_BASE+18
 
+#define IK_CMD_GET_SN               CMD_BASE+40
+
 //
 //  result codes/data sent to the software
 //  see firmware documentation for details
@@ -69,6 +71,12 @@
 
 
 #define IK_FIRSTUNUSED_EVENTCODE    EVENT_BASE+20
+
+// Arduino IK driver events
+#define AIK_EVENT_BASE 80
+#define IK_EVENT_CONNECT            AIK_EVENT_BASE+1
+#define IK_EVENT_DISCONNECT         AIK_EVENT_BASE+2
+#define IK_EVENT_SERNUM             AIK_EVENT_BASE+3
 
 //
 //  number of light sensors for reading overlay bar codes
