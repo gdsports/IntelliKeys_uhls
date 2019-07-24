@@ -55,6 +55,7 @@ protocol. Probably not a good candidate for CP.
 #define IK_EVENT_CONNECT            AIK_EVENT_BASE+1
 #define IK_EVENT_DISCONNECT         AIK_EVENT_BASE+2
 #define IK_EVENT_SERNUM             AIK_EVENT_BASE+3
+```
 
 ### Membrane Press
     {0xFF, 0x03, IK_EVENT_MEMBRANE_PRESS, x, y}

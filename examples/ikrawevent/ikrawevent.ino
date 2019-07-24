@@ -20,60 +20,6 @@ IntelliKeys ikey1(&myusb);
 
 char mySN[IK_EEPROM_SN_SIZE+1]; //+1 NUL
 
-/******************************************************
-#define EVENT_BASE 50
-#define IK_EVENT_ACK                EVENT_BASE+1
-#define IK_EVENT_MEMBRANE_PRESS     EVENT_BASE+2
-#define IK_EVENT_MEMBRANE_RELEASE   EVENT_BASE+3
-#define IK_EVENT_SWITCH             EVENT_BASE+4
-#define IK_EVENT_SENSOR_CHANGE      EVENT_BASE+5
-#define IK_EVENT_VERSION            EVENT_BASE+6
-#define IK_EVENT_EEPROM_READ        EVENT_BASE+7
-#define IK_EVENT_ONOFFSWITCH        EVENT_BASE+8
-#define IK_EVENT_NOMOREEVENTS       EVENT_BASE+9
-#define IK_EVENT_MEMBRANE_REPEAT    EVENT_BASE+10
-#define IK_EVENT_SWITCH_REPEAT      EVENT_BASE+11
-#define IK_EVENT_CORRECT_MEMBRANE   EVENT_BASE+12
-#define IK_EVENT_CORRECT_SWITCH     EVENT_BASE+13
-#define IK_EVENT_CORRECT_DONE       EVENT_BASE+14
-#define IK_EVENT_EEPROM_READBYTE    EVENT_BASE+15
-#define IK_EVENT_DEVICEREADY        EVENT_BASE+16
-#define IK_EVENT_AUTOPILOT_STATE    EVENT_BASE+17
-#define IK_EVENT_DELAY              EVENT_BASE+18
-#define IK_EVENT_ALL_SENSORS        EVENT_BASE+19
-
-// Arduino IK driver events
-#define AIK_EVENT_BASE 80
-#define IK_EVENT_CONNECT            AIK_EVENT_BASE+1
-#define IK_EVENT_DISCONNECT         AIK_EVENT_BASE+2
-#define IK_EVENT_SERNUM             AIK_EVENT_BASE+3
-
-struct IKEvent
-{
-uint8_t startFlag;  // Always 0xFF.
-uint8_t evLength;   // Total number of bytes starting with evType
-uint8_t evType;     // See IK_EVENT_* above
-uint8_t payload[];  // The actual number of bytes that follow
-// could be 0..254.
-}
-
-The receiver should scan the stream of oxFF. The next byte is the number of
-bytes in the event including evType. The next byte is the event type.
-If the receiver does not understand how to handle the event, it can use the
-length to skip over the remaining bytes so it can easily find the start of the
-next event startFlag. This makes it possible to add new events which the
-receiver cannot handle. The receiver can skip over unknown events until the
-receiver is enhanced to handle the new events.
-
-If 0xFF appears in the payload, this can cause problems. Hopefully, this will
-resync on the next of 0xFF. Assuming dropped and corrupted characters are rare.
-
-Solving this problem in general means adding flag byte escaping, ACK/NAK, retry
-limits, inter-byte and inter-packet timeouts, etc. XMODEM or HDLC type of
-protocol. Probably not a good candidate for CP.
-
- *********************************************************/
-
 // Raw undecoded events from the IK. Just send them as-is.
 // The byte following the length is the event type.
 void IK_raw_event(const uint8_t *rxevent, size_t len)
@@ -144,41 +90,6 @@ void IK_put_SN()
   IKSerial.write(buf, sizeof(buf));
   IKSerial.write(mySN, IK_EEPROM_SN_SIZE);
 }
-
-/*
- * Commands
-
-#define CMD_BASE 0
-#define IK_CMD_GET_VERSION          CMD_BASE+1
-#define IK_CMD_LED                  CMD_BASE+2
-#define IK_CMD_SCAN                 CMD_BASE+3
-#define IK_CMD_TONE                 CMD_BASE+4
-#define IK_CMD_GET_EVENT            CMD_BASE+5
-#define IK_CMD_INIT                 CMD_BASE+6
-#define IK_CMD_EEPROM_READ          CMD_BASE+7
-#define IK_CMD_EEPROM_WRITE         CMD_BASE+8
-#define IK_CMD_ONOFFSWITCH          CMD_BASE+9
-#define IK_CMD_CORRECT              CMD_BASE+10
-#define IK_CMD_EEPROM_READBYTE      CMD_BASE+11
-#define IK_CMD_RESET_DEVICE         CMD_BASE+12
-#define IK_CMD_START_AUTO           CMD_BASE+13
-#define IK_CMD_STOP_AUTO            CMD_BASE+14
-#define IK_CMD_ALL_LEDS             CMD_BASE+15
-#define IK_CMD_START_OUTPUT         CMD_BASE+16
-#define IK_CMD_STOP_OUTPUT          CMD_BASE+17
-#define IK_CMD_ALL_SENSORS          CMD_BASE+18
-
-#define IK_CMD_GET_SN               CMD_BASE+40
-
-struct IKCommand
-{
-uint8_t startFlag;  // Always 0xFF.
-uint8_t cmdLength;  // Total number of bytes starting with cmdType
-uint8_t cmdType;    // See IK_COMMAND_* above
-uint8_t payload[];  // The actual number of bytes that follow
-// could be 0..254.
-}
-*/
 
 void readCommand()
 {
