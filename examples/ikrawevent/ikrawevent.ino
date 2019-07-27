@@ -20,6 +20,14 @@ IntelliKeys ikey1(&myusb);
 
 char mySN[IK_EEPROM_SN_SIZE+1]; //+1 NUL
 
+#ifdef ADAFRUIT_TRINKET_M0
+// setup Dotstar LED on Trinket M0
+#include <Adafruit_DotStar.h>
+#define DATAPIN    7
+#define CLOCKPIN   8
+Adafruit_DotStar strip = Adafruit_DotStar(1, DATAPIN, CLOCKPIN, DOTSTAR_BRG);
+#endif
+
 // Raw undecoded events from the IK. Just send them as-is.
 // The byte following the length is the event type.
 void IK_raw_event(const uint8_t *rxevent, size_t len)
@@ -180,6 +188,15 @@ void execCommand(const uint8_t *command, size_t len)
 }
 
 void setup() {
+  // Turn off built-in RED LED
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+#ifdef ADAFRUIT_TRINKET_M0
+  // Turn off built-in Dotstar RGB LED
+  strip.begin();
+  strip.clear();
+  strip.show();
+#endif
   DBSerial.begin(115200);
   DBSerial.println("IntelliKeys USB Test");
   // If there are concerns about IKSerial transmission being too slow, boost

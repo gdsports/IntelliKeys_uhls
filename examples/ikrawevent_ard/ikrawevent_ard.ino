@@ -12,6 +12,14 @@
  * written in C/C++ Arduino.
  */
 
+#ifdef ADAFRUIT_TRINKET_M0
+// setup Dotstar LED on Trinket M0
+#include <Adafruit_DotStar.h>
+#define DATAPIN    7
+#define CLOCKPIN   8
+Adafruit_DotStar strip = Adafruit_DotStar(1, DATAPIN, CLOCKPIN, DOTSTAR_BRG);
+#endif
+
 #include <intellikeysdefs.h>
 #include <Keyboard.h>
 #include <Mouse.h>
@@ -21,6 +29,15 @@
 
 void setup()
 {
+  // Turn off built-in RED LED
+  pinMode(LED_BUILTIN, OUTPUT);
+  digitalWrite(LED_BUILTIN, LOW);
+#ifdef ADAFRUIT_TRINKET_M0
+  // Turn off built-in Dotstar RGB LED
+  strip.begin();
+  strip.clear();
+  strip.show();
+#endif
   DBSerial.begin(115200);
   while(!DBSerial) delay(1);
   IKSerial.begin(115200);
