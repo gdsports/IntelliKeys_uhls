@@ -158,7 +158,7 @@ def IK_get_sn():
     uart.write(array.array('B', [0xFF, 0x01, IK_CMD_GET_SN]))
 
 # All LEDs on
-for i in range(0,15):
+for i in range(0,12):
     IK_set_led(i, 1)
 
 IK_set_tone(0,0,0)
@@ -172,7 +172,7 @@ IK_get_correct()
 
 time.sleep(1)
 # All LEDs off
-for i in range(0,15):
+for i in range(0,12):
     IK_set_led(i, 0)
 
 while True:
