@@ -19,6 +19,8 @@ arduino --install-boards "adafruit:samd"
 cd $LIBDIR
 # Install the latest Arduino JSON library
 arduino --install-library "ArduinoJson"
+arduino --install-library "Adafruit DotStar"
+arduino --install-library "Adafruit TinyUSB Library"
 # Install USB Host Library SAMD
 git clone https://github.com/gdsports/USB_Host_Library_SAMD
 # For production

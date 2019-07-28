@@ -1,6 +1,15 @@
 #ifndef _INTELLIKEYSDEFS_H_
 #define _INTELLIKEYSDEFS_H_
 
+enum IK_LEDS {
+    IK_LED_SHIFT=1,
+    IK_LED_CAPS_LOCK=4,
+    IK_LED_MOUSE=7,
+    IK_LED_ALT=2,
+    IK_LED_CTRL_CMD=5,
+    IK_LED_NUM_LOCK=8
+};
+
 /*
  * Most of this file is extracted from the OpenIKeys project.
  */
