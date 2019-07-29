@@ -21,7 +21,7 @@ cd $LIBDIR
 arduino --install-library "ArduinoJson"
 arduino --install-library "Adafruit DotStar"
 git clone https://github.com/adafruit/Adafruit_TinyUSB_Arduino
-git clone https://github.com/adafruit/Adafruit SPIFlash
+git clone https://github.com/adafruit/Adafruit_SPIFlash
 git clone https://github.com/adafruit/SdFat
 # Install USB Host Library SAMD
 git clone https://github.com/gdsports/USB_Host_Library_SAMD

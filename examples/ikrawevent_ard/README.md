@@ -31,17 +31,18 @@ ikrawevent bridges between the IK USB and its UART. ikrawevent_ard bridges
 between its UART and USB device keyboard and mouse. TBD USB device
 mass storage.
 
-ikrawevent_ard is written in Arduino C/C++. It currently uses
+ikrawevent_ard is written in Arduino C/C++. It currently uses the following
+libraries
 
-Adafruit tinyUSB
-Adafruit DotStar
+* Adafruit tinyUSB
+* Adafruit DotStar
+* Adafruit SPIFlash
+* Adafruit SdFat
 
 The DotStar library is currently only used to turn off the TM0 RGB LED.
 
-The tinyUSB library is used to emulate USB keyboard and mouse to the Computer.
-
-I confirmed keyboard, mouse, serial, and mass storage work at the same time.
-An M4 Express board or any M0 or M4 board with SPI or QSPI Flash should work.
+TinyUSB keyboard, mouse, serial, and mass storage work at the same time on
+an M4 Express board. Any M0 or M4 board with SPI or QSPI Flash should work.
 
 Looks like SPI Flash will be required unless there is a way to use part of the
-SAMD21 Flash for MSC.
+SAMD21 Flash for MSC. This is not supported in TinyUSB but might be possible.
