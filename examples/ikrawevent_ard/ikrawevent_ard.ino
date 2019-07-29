@@ -12,7 +12,7 @@
  * written in C/C++ Arduino.
  */
 
-#define DEBUG_SERIAL 0
+#define DEBUG_SERIAL 1
 
 #ifdef ADAFRUIT_TRINKET_M0
 // setup Dotstar LED on Trinket M0
