@@ -39,7 +39,9 @@ Adafruit DotStar
 The DotStar library is currently only used to turn off the TM0 RGB LED.
 
 The tinyUSB library is used to emulate USB keyboard and mouse to the Computer.
-I will see if it possible to use keyboard, mouse, serial, and mass storage at
-the same time. I have an M4 Express board to try this. Looks like SPI Flash
-will be required unless there is a way to use part of the SAMD21 Flash for
-MSC. I do not see this as an option.
+
+I confirmed keyboard, mouse, serial, and mass storage work at the same time.
+An M4 Express board or any M0 or M4 board with SPI or QSPI Flash should work.
+
+Looks like SPI Flash will be required unless there is a way to use part of the
+SAMD21 Flash for MSC.

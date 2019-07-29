@@ -12,7 +12,35 @@
 #endif
 #define IKSerial    Serial1
 
+#include "SPI.h"
+#include "SdFat.h"
+#include "Adafruit_SPIFlash.h"
 #include <Adafruit_TinyUSB.h>
+
+#if defined(__SAMD51__) || defined(NRF52840_XXAA)
+Adafruit_FlashTransport_QSPI flashTransport(PIN_QSPI_SCK, PIN_QSPI_CS, PIN_QSPI_IO0, PIN_QSPI_IO1, PIN_QSPI_IO2, PIN_QSPI_IO3);
+#else
+#if (SPI_INTERFACES_COUNT == 1)
+Adafruit_FlashTransport_SPI flashTransport(SS, &SPI);
+#else
+Adafruit_FlashTransport_SPI flashTransport(SS1, &SPI1);
+#endif
+#endif
+
+Adafruit_SPIFlash flash(&flashTransport);
+
+// file system object from SdFat
+FatFileSystem fatfs;
+
+FatFile root;
+FatFile file;
+
+// USB Mass Storage object
+Adafruit_USBD_MSC usb_msc;
+
+// Set to true when PC write to flash
+bool Flash_changed;
+
 // Report ID
 enum
 {
@@ -30,6 +58,42 @@ uint8_t const desc_hid_report[] =
 // USB HID object
 Adafruit_USBD_HID usb_hid;
 
+// Callback invoked when received READ10 command.
+// Copy disk's data to buffer (up to bufsize) and
+// return number of copied bytes (must be multiple of block size)
+int32_t msc_read_cb (uint32_t lba, void* buffer, uint32_t bufsize)
+{
+    // Note: SPIFLash Bock API: readBlocks/writeBlocks/syncBlocks
+    // already include 4K sector caching internally. We don't need to cache it, yahhhh!!
+    return flash.readBlocks(lba, (uint8_t*) buffer, bufsize/512) ? bufsize : -1;
+}
+
+// Callback invoked when received WRITE10 command.
+// Process data in buffer to disk's storage and
+// return number of written bytes (must be multiple of block size)
+int32_t msc_write_cb (uint32_t lba, uint8_t* buffer, uint32_t bufsize)
+{
+    digitalWrite(LED_BUILTIN, HIGH);
+
+    // Note: SPIFLash Bock API: readBlocks/writeBlocks/syncBlocks
+    // already include 4K sector caching internally. We don't need to cache it, yahhhh!!
+    return flash.writeBlocks(lba, buffer, bufsize/512) ? bufsize : -1;
+}
+
+// Callback invoked when WRITE10 command is completed (status received and accepted by host).
+// used to flush any pending cache.
+void msc_flush_cb (void)
+{
+    // sync with flash
+    flash.syncBlocks();
+
+    // clear file system's cache to force refresh
+    fatfs.cacheClear();
+
+    Flash_changed = true;
+
+    digitalWrite(LED_BUILTIN, LOW);
+}
 
 // the setup function runs once when you press reset or power the board
 void tinyusb_setup()
@@ -39,12 +103,70 @@ void tinyusb_setup()
 
     usb_hid.begin();
 
+    flash.begin();
+
+    // Set disk vendor id, product id and revision with string up to 8, 16, 4 characters respectively
+    usb_msc.setID("Adafruit", "External Flash", "1.0");
+
+    // Set callback
+    usb_msc.setReadWriteCallback(msc_read_cb, msc_write_cb, msc_flush_cb);
+
+    // Set disk size, block size should be 512 regardless of spi flash page size
+    usb_msc.setCapacity(flash.pageSize()*flash.numPages()/512, 512);
+
+    // MSC is ready for read/write
+    usb_msc.setUnitReady(true);
+
+    usb_msc.begin();
+
+    // Init file system on the flash
+    fatfs.begin(&flash);
+
+    Flash_changed = true; // to print contents initially
+
     // wait until device mounted
     while( !USBDevice.mounted() ) delay(1);
+
+    DBSerial.println("Adafruit TinyUSB Mass Storage External Flash example");
+    DBSerial.print("JEDEC ID: "); DBSerial.println(flash.getJEDECID(), HEX);
+    DBSerial.print("Flash size: "); DBSerial.println(flash.size());
 }
 
 void tinyusb_loop()
 {
+    if ( Flash_changed )
+    {
+        Flash_changed = false;
+
+        if ( !root.open("/") )
+        {
+            DBSerial.println("open root failed");
+            return;
+        }
+
+        DBSerial.println("Flash contents:");
+
+        // Open next file in root.
+        // Warning, openNext starts at the current directory position
+        // so a rewind of the directory may be required.
+        while ( file.openNext(&root, O_RDONLY) )
+        {
+            file.printFileSize(&DBSerial);
+            DBSerial.write(' ');
+            file.printName(&DBSerial);
+            if ( file.isDir() )
+            {
+                // Indicate a directory.
+                DBSerial.write('/');
+            }
+            DBSerial.println();
+            file.close();
+        }
+
+        root.close();
+
+        DBSerial.println();
+    }
 }
 
 void tinyusb_mouse_move(int8_t x, int8_t y)
@@ -64,7 +186,7 @@ uint8_t KeyModifiers;
 inline bool isModifierKey(uint8_t hid_keycode)
 {
     return ((hid_keycode >= HID_KEY_CONTROL_LEFT) &&
-        (hid_keycode <= HID_KEY_GUI_RIGHT));
+            (hid_keycode <= HID_KEY_GUI_RIGHT));
 }
 
 inline uint8_t maskModifierKey(uint8_t hid_keycode)

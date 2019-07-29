@@ -20,14 +20,54 @@ cd $LIBDIR
 # Install the latest Arduino JSON library
 arduino --install-library "ArduinoJson"
 arduino --install-library "Adafruit DotStar"
-arduino --install-library "Adafruit TinyUSB Library"
+git clone https://github.com/adafruit/Adafruit_TinyUSB_Arduino
+git clone https://github.com/adafruit/Adafruit SPIFlash
+git clone https://github.com/adafruit/SdFat
 # Install USB Host Library SAMD
 git clone https://github.com/gdsports/USB_Host_Library_SAMD
-# For production
-BOARD="adafruit:samd:adafruit_trinket_m0"
-CC="arduino --verify --board ${BOARD}"
-arduino --board "${BOARD}" --save-prefs
+# Install IntelliKeys library
 git clone https://github.com/gdsports/IntelliKeys_uhls.git
-# ikevent.ino should work.
 cd ${LIBDIR}/IntelliKeys_uhls/examples
-(find . -name '*.ino' -print0 | xargs -0 -n 1 $CC >/tmp/samd_$$.txt 2>&1)&
+# For production
+BUILDBOARDS_M4="adafruit_feather_m4 adafruit_metro_m4 adafruit_grandcentral_m4 adafruit_itsybitsy_m4 adafruit_feather_m4"
+BUILDBOARDS_M0="adafruit_trinket_m0 adafruit_metro_m0 adafruit_feather_m0_express adafruit_circuitplayground_m0 adafruit_circuitplayground_m0"
+
+for BOARDNAME in $BUILDBOARDS_M0 $BUILDBOARDS_M4
+do
+    echo "BOARDNAME=${BOARDNAME}"
+    if [[ $BOARDNAME == *"m4"* ]]
+    then
+        UF2OFFSET="0x4000"
+    else
+        UF2OFFSET="0x2000"
+    fi
+    echo "UF2OFFSET=${UF2OFFSET}"
+    BOARD="adafruit:samd:${BOARDNAME}"
+    arduino --pref "custom_debug=${BOARDNAME}_off" \
+            --pref "custom_cache=${BOARDNAME}_on" \
+            --pref "custom_debug=${BOARDNAME}_off" \
+            --pref "custom_maxqspi=${BOARDNAME}_50" \
+            --pref "custom_opt=${BOARDNAME}_small" \
+            --pref "custom_speed=${BOARDNAME}_120" --save-prefs
+    BUILDPATH=/tmp/mybuilddir_$$/${BOARDNAME}
+    CC="arduino --verify --buildpath $BUILDPATH --preserve-temp-files --board ${BOARD}"
+    echo "BUILDPATH=$BUILDPATH"
+    rm -rf $BUILDPATH
+    mkdir -p $BUILDPATH
+    for EXAMPLE in $(find . -name '*.ino')
+    do
+        echo "EXAMPLE=$EXAMPLE"
+        if [[ ${EXAMPLE} == *"ikrawevent_ard"* ]]
+        then
+            arduino --pref "custom_usbstack=${BOARDNAME}_tinyusb" --save-prefs
+        else
+            arduino --pref "custom_usbstack=${BOARDNAME}_arduino" --save-prefs
+        fi
+        if $CC ${EXAMPLE}
+        then
+            inoname="$(basename -- ${EXAMPLE})"
+            uf2conv.py -b ${UF2OFFSET} -c $BUILDPATH/${inoname}.bin -o ${inoname}.${BOARDNAME}.bin.uf2
+        fi
+    done
+done
+
