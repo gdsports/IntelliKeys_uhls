@@ -66,7 +66,7 @@ do
         if $CC ${EXAMPLE}
         then
             inoname="$(basename -- ${EXAMPLE})"
-            uf2conv.py -b ${UF2OFFSET} -c $BUILDPATH/${inoname}.bin -o ${inoname}.${BOARDNAME}.bin.uf2
+            ../uf2conv.py -b ${UF2OFFSET} -c $BUILDPATH/${inoname}.bin -o ${inoname}.${BOARDNAME}.bin.uf2
         fi
     done
 done
