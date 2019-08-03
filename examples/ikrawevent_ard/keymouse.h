@@ -95,11 +95,39 @@ void msc_flush_cb (void)
     digitalWrite(LED_BUILTIN, LOW);
 }
 
+uint16_t get_report(uint8_t report_id, hid_report_type_t report_type, uint8_t *buf, uint16_t reqlen)
+{
+    DBSerial.print("get_report report_id="); DBSerial.print(report_id);
+    DBSerial.print(" report_type="); DBSerial.print(report_type);
+    DBSerial.print(" reqlen="); DBSerial.print(reqlen);
+    DBSerial.print(" buf[0]=0x"); DBSerial.println(buf[0], HEX);
+}
+
+void set_report(uint8_t report_id, hid_report_type_t report_type, uint8_t const *buf, uint16_t bufsize)
+{
+    DBSerial.print("set_report report_id="); DBSerial.print(report_id);
+    DBSerial.print(" report_type="); DBSerial.print(report_type);
+    DBSerial.print(" bufsize="); DBSerial.print(bufsize);
+    DBSerial.print(" buf[0]=0x"); DBSerial.print(buf[0], HEX);
+    DBSerial.print(" buf[1]=0x"); DBSerial.println(buf[1], HEX);
+    // Set LED from USB host
+    if ((report_id == HID_PROTOCOL_KEYBOARD)
+            && (report_type == HID_REPORT_TYPE_OUTPUT)) {
+        if ((bufsize >= 2) && (buf[0] == HID_PROTOCOL_KEYBOARD)) {
+            bool numLock = (buf[1] & 0x01) != 0;
+            bool capsLock = (buf[1] & 0x02) != 0;
+            IK_set_led(IK_LED_NUM_LOCK, numLock);
+            IK_set_led(IK_LED_CAPS_LOCK, capsLock);
+        }
+    }
+}
+
 // the setup function runs once when you press reset or power the board
 void tinyusb_setup()
 {
     usb_hid.setPollInterval(2);
     usb_hid.setReportDescriptor(desc_hid_report, sizeof(desc_hid_report));
+    usb_hid.setReportCallback(get_report, set_report);
 
     usb_hid.begin();
 

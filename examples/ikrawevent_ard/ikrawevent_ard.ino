@@ -22,6 +22,8 @@
 Adafruit_DotStar strip = Adafruit_DotStar(1, DATAPIN, CLOCKPIN, DOTSTAR_BRG);
 #endif
 
+void IK_set_led(uint8_t num, uint8_t state);
+
 #include "intellikeys.h"
 #include "keymouse.h"
 
@@ -372,11 +374,9 @@ void process_membrane_press(int x, int y)
       switch (keycode) {
         case HID_KEY_CAPS_LOCK:
           caps_lock = !caps_lock;
-          IK_set_led(IK_LED_CAPS_LOCK, caps_lock);
           break;
         case HID_KEY_NUM_LOCK:
           num_lock = !num_lock;
-          IK_set_led(IK_LED_NUM_LOCK, num_lock);
           break;
         case HID_KEY_SHIFT_LEFT:
           process_locking(shift_lock, IK_LED_SHIFT, keycode);
