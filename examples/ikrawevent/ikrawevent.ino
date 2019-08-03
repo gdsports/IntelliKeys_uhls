@@ -32,6 +32,9 @@ Adafruit_DotStar strip = Adafruit_DotStar(1, DATAPIN, CLOCKPIN, DOTSTAR_BRG);
 // The byte following the length is the event type.
 void IK_raw_event(const uint8_t *rxevent, size_t len)
 {
+  if ((*rxevent == IK_EVENT_MEMBRANE_PRESS) || (*rxevent == IK_EVENT_MEMBRANE_RELEASE)) {
+    DBSerial.print("ev="); DBSerial.println(*rxevent);
+  }
   switch (*rxevent) {
     case IK_EVENT_MEMBRANE_PRESS:
     case IK_EVENT_MEMBRANE_RELEASE:
@@ -84,6 +87,7 @@ void IK_disconnect(void)
 {
   uint8_t buf[3] = {0xFF, 1, IK_EVENT_DISCONNECT};
   IKSerial.write(buf, sizeof(buf));
+  memset(mySN, 0, sizeof(mySN));
 }
 
 void IK_get_SN(uint8_t SN[IK_EEPROM_SN_SIZE])

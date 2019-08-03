@@ -179,6 +179,7 @@ void tinyusb_loop()
         // so a rewind of the directory may be required.
         while ( file.openNext(&root, O_RDONLY) )
         {
+#if DEBUG_SERIAL
             file.printFileSize(&DBSerial);
             DBSerial.write(' ');
             file.printName(&DBSerial);
@@ -188,6 +189,7 @@ void tinyusb_loop()
                 DBSerial.write('/');
             }
             DBSerial.println();
+#endif
             file.close();
         }
 
@@ -233,10 +235,8 @@ void tinyusb_key_press(uint8_t hid_keycode)
     }
     if (isModifierKey(hid_keycode)) {
         KeyModifiers |= maskModifierKey(hid_keycode);
-        DBSerial.printf("KeyModifers=%X\n", KeyModifiers);
     }
     if ( usb_hid.ready() ) {
-        DBSerial.printf("KeysDown[0]=%X\n", KeysDown[0]);
         // Add keycode to KeysDown
         for (int i = 0; i < sizeof(KeysDown); i++) {
             if ((KeysDown[i] == 0) || (KeysDown[i] == hid_keycode)) {

@@ -260,9 +260,11 @@ uint32_t IntelliKeys::Release() {
 
     bIface = 0;
     bNumEP = 1;
-
+    bPollEnable = false;
     bAddress = 0;
     qNextPollTime = 0;
+    IK_state = 0;
+    if (disconnect_callback) (*disconnect_callback)();
     return 0;
 }
 
@@ -470,6 +472,7 @@ inline int IntelliKeys::PostCommand(uint8_t *command)
     }
     if(rv && rv != USB_ERRORFLOW) {
         Release();
+        return rv;
     }
     IK_poll();
     return rv;
@@ -534,7 +537,6 @@ int IntelliKeys::reset(void) {
 }
 
 int IntelliKeys::get_correct(void) {
-    USBTRACE("get_correct\r\n");
     uint8_t command[IK_REPORT_LEN] = {IK_CMD_CORRECT,0,0,0,0,0,0,0};
     return PostCommand(command);
 }

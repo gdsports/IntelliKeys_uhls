@@ -12,7 +12,7 @@
  * written in C/C++ Arduino.
  */
 
-#define DEBUG_SERIAL 1
+#define DEBUG_SERIAL 0
 
 #ifdef ADAFRUIT_TRINKET_M0
 // setup Dotstar LED on Trinket M0
@@ -368,7 +368,6 @@ void process_membrane_press(int x, int y)
   DBSerial.printf("col,row (%d,%d) membrane %d\n", col, row, membrane[row][col]);
   if (membrane[row][col] == 0) {
     keycode = membrane_actions[row][col];
-    DBSerial.printf("keycode %X\n", keycode);
     if (keycode) {
       tinyusb_key_press(keycode);
       switch (keycode) {
