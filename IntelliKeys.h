@@ -107,6 +107,9 @@ class IntelliKeys: public USBDeviceConfig, public UsbConfigXtracter {
         virtual uint32_t GetAddress() {
             return 0;
         }
+        virtual bool isReady() {
+                return ready;
+        }
         virtual void ResetHubPort(uint32_t /* port */) {
             return;
         } // Note used for hubs only!

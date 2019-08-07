@@ -110,13 +110,14 @@ void readCommand()
   static uint8_t *p;
   static uint8_t cmdState;
 
+  if (!ikey1.isReady()) return;
+
   while (IKSerial.available() > 0) {
     size_t bytesIn;
     switch (cmdState) {
       case 0: // Scan for 0xFF
         if (IKSerial.read() == 0xFF) {
           cmdState = 1;
-          DBSerial.println("cmdState>1");
         }
         break;
       case 1: // Get cmdLen value
@@ -124,7 +125,6 @@ void readCommand()
         if (cmdLen > sizeof(command)) cmdLen = sizeof(command);
         p = command;
         cmdState = 2;
-        DBSerial.println("cmdState>2");
         break;
       case 2: // Get cmdLen bytes
         bytesIn = IKSerial.readBytes(p, cmdLen - (p - command));
@@ -134,7 +134,6 @@ void readCommand()
             cmdState = 0;
             // Have a complete command
             execCommand(command, cmdLen);
-            DBSerial.println("cmdState>0");
           }
         }
         break;
@@ -148,7 +147,6 @@ void readCommand()
 
 void execCommand(const uint8_t *command, size_t len)
 {
-  DBSerial.print("cmd "); DBSerial.println(command[0]);
   switch (command[0]) {
     case IK_CMD_GET_VERSION:
       ikey1.get_version();

@@ -189,7 +189,7 @@ uint32_t IntelliKeys::Init(uint32_t parent, uint32_t port, uint32_t lowspeed) {
 
     USBTRACE("IntelliKeys configured\r\n");
 
-    ready = true;
+    if (udd->idProduct == IK_PID_RUNNING) ready = true;
 
     return 0;
 
